@@ -1,0 +1,474 @@
+---
+jupyter:
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+  language_info:
+    codemirror_mode: r
+    file_extension: .r
+    mimetype: text/x-r-source
+    name: R
+    pygments_lexer: r
+    version: 3.6.0
+  nbformat: 4
+  nbformat_minor: 4
+---
+
+::: {.cell .markdown}
+# 1. Summary {#1-summary}
+
+Welcome to this market analysis, in this case we will looking for
+improvement opportunities for Bellabeat. Bellabeat is a wellness Company
+headquartered in San Francisco that develops wearable computers for
+women. The company has offices in Zagreb, San Francisco and London. It
+was founded in 2013 by Sandro Mur and Urška Sršen.
+
+In this case, we will focus on the main product from Bellabeat, Leaf: A
+wellness tracker that can be worn as a bracelet, necklace, or clip. The
+Leaf tracker connects to the Bellabeat app to track activity, sleep,
+stress and other features.
+
+## Stakeholders:
+
+-   Urška Sršen: Bellabeat's cofounder and Chief Creative Officer
+-   Sando Mur: Mathematician and Bellabeat's cofounder; key member of
+    the Bellabeat executive team.
+-   Bellabeat marketing analytics team: A team of data analysts
+    responsible for collecting, analyzing, and reporting data that helps
+    guide Bellabeat's marketing strategy.
+
+## We will be answering three different questions:
+
+-   What trends can we find in the FitBit dataset?
+-   How are those trends related to Bellabeat?
+-   How can we take profit of this information and make data-driven
+    decisions?
+
+# 2. Data source descritpion {#2-data-source-descritpion}
+
+For this analysis, we will be using the
+[FitBit](https://www.kaggle.com/arashnic/fitbit) dataset. This Kaggle
+dataset contains personal fitness tracker from thirty fitbit users.
+Thirty eligible Fitbit users consented to the submission of personal
+tracker data, including minute-level output for physical activity, heart
+rate, and sleep monitoring.
+
+This data was gathered in the timeframe of 4/12/2016 - 5/12/2016. This
+dataset is open source, made available through
+[Mobius](https://www.kaggle.com/arashnic).
+
+We will use R and spreadsheets to perform the cleaning, analysis and
+visualizing process.
+
+# 3. Cleaning and manipulation of the data {#3-cleaning-and-manipulation-of-the-data}
+
+## Installing and preparing the tools on R
+
+For this analysis, we will use the **tidyverse** framework, it will help
+us clean, analyze and visualize the dataset, we will use the main
+libraries from it:
+
+-   lubridate for working with dates and time.
+-   dplyr for making data manipulation easier
+-   ggplot2 for data visualization
+-   tidyr for data cleaning
+
+As well as other libraries for cleaning data.
+
+the setup goes as following:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:40.542129Z\",\"iopub.status.idle\":\"2022-06-19T14:37:41.538562Z\",\"iopub.execute_input\":\"2022-06-19T14:37:40.573756Z\"}" jupyter="{\"source_hidden\":true}" trusted="true"}
+``` {.R}
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(here)
+library(skimr)
+library(janitor)
+```
+:::
+
+::: {.cell .markdown}
+## Importing datasets
+
+We will be the following spreadsheets from the dataset:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:41.540843Z\",\"iopub.status.idle\":\"2022-06-19T14:37:42.079397Z\",\"iopub.execute_input\":\"2022-06-19T14:37:41.542507Z\"}" trusted="true"}
+``` {.R}
+sleep <- read.csv("../input/fitbit/Fitabase Data 4.12.16-5.12.16/minuteSleep_merged.csv")
+daily_activity <- read.csv("../input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+daily_calories <- read.csv("../input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
+daily_steps <- read.csv("../input/fitbit/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv")
+```
+:::
+
+::: {.cell .markdown}
+Let´s make sure the datasets imported correctly:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:42.081834Z\",\"iopub.status.idle\":\"2022-06-19T14:37:42.126256Z\",\"iopub.execute_input\":\"2022-06-19T14:37:42.083206Z\"}" trusted="true"}
+``` {.R}
+head(daily_activity)
+head(daily_steps)
+```
+:::
+
+::: {.cell .markdown}
+Now that we are all set, let\'s take a view of our data. The data is in
+a long format, so that there are many rows with the same ID. This is due
+to different reasons, like different hours of the day, different
+intensity, etc. We may need to know how many users (id\'s) were taking
+in consideration, so for that we will count every different Id just
+once:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:42.128586Z\",\"iopub.status.idle\":\"2022-06-19T14:37:42.178655Z\",\"iopub.execute_input\":\"2022-06-19T14:37:42.129943Z\"}" trusted="true"}
+``` {.R}
+n_distinct(sleep$Id)
+n_distinct(daily_activity$Id)
+n_distinct(daily_calories$Id)
+n_distinct(daily_steps$Id)
+```
+:::
+
+::: {.cell .markdown}
+As we can see and assume from the results, there is a maximum of 33
+users for the likes of activity, calories or steps. But there are less
+users for sleep, with only 24. Because of this size limitation and the
+lack of demographical information, this sample may be biased.
+
+Now, let\'s look for duplicates and remove them:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:42.180912Z\",\"iopub.status.idle\":\"2022-06-19T14:37:42.924999Z\",\"iopub.execute_input\":\"2022-06-19T14:37:42.182216Z\"}" trusted="true"}
+``` {.R}
+sum(duplicated(sleep))
+sum(duplicated(daily_activity))
+sum(duplicated(daily_calories))
+sum(duplicated(daily_steps))
+```
+:::
+
+::: {.cell .markdown}
+We can see that the sleep table has 543 duplicates, let\'s remove the
+duplicates:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:42.927348Z\",\"iopub.status.idle\":\"2022-06-19T14:37:42.985514Z\",\"iopub.execute_input\":\"2022-06-19T14:37:42.928814Z\"}" trusted="true"}
+``` {.R}
+sleep <- sleep %>%
+  distinct() %>%
+  drop_na()
+```
+:::
+
+::: {.cell .markdown}
+Let\'s check again.
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:42.988303Z\",\"iopub.status.idle\":\"2022-06-19T14:37:43.545942Z\",\"iopub.execute_input\":\"2022-06-19T14:37:42.989903Z\"}" trusted="true"}
+``` {.R}
+sum(duplicated(sleep))
+```
+:::
+
+::: {.cell .markdown}
+Now that we removed the duplicates, let\'s rename the column names, so
+that every name is formatted with the same syntax. This will be useful
+for merging the tables later.
+:::
+
+::: {.cell .code collapsed="true" execution="{\"iopub.status.busy\":\"2022-06-19T14:37:43.548231Z\",\"iopub.status.idle\":\"2022-06-19T14:37:43.978831Z\",\"iopub.execute_input\":\"2022-06-19T14:37:43.549602Z\"}" jupyter="{\"outputs_hidden\":true}" trusted="true"}
+``` {.R}
+clean_names(sleep)
+sleep <- rename_with(sleep, tolower)
+clean_names(daily_activity)
+daily_activity<- rename_with(daily_activity, tolower)
+clean_names(daily_steps)
+daily_steps <- rename_with(daily_steps, tolower)
+clean_names(daily_calories)
+daily_calories <- rename_with(daily_calories, tolower)
+```
+:::
+
+::: {.cell .markdown}
+Now, we want to merge the datasets for getting insights and trends on
+the data. For that, we may want to rename and format date-time.
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:43.981196Z\",\"iopub.status.idle\":\"2022-06-19T14:37:44.188728Z\",\"iopub.execute_input\":\"2022-06-19T14:37:43.982605Z\"}" trusted="true"}
+``` {.R}
+sleep <- sleep %>%
+  mutate(date = as_date(date,format ="%m/%d/%Y %I:%M:%S %p"))
+  
+
+
+daily_activity <- daily_activity %>%
+  rename(date = activitydate) %>%
+  mutate(date = as_date(date, format = "%m/%d/%Y"))
+
+
+daily_steps <- daily_steps %>%
+  rename(date = activityday) %>%
+  mutate(date = as_date(date, format = "%m/%d/%Y"))
+
+daily_calories <- daily_calories %>%
+  rename(date = activityday) %>%
+  mutate(date = as_date(date, format = "%m/%d/%Y"))
+```
+:::
+
+::: {.cell .markdown}
+Great! Now let\'s make sure that the formatting went correctly:
+:::
+
+::: {.cell .code collapsed="true" execution="{\"iopub.status.busy\":\"2022-06-19T14:37:44.19108Z\",\"iopub.status.idle\":\"2022-06-19T14:37:44.267591Z\",\"iopub.execute_input\":\"2022-06-19T14:37:44.192439Z\"}" jupyter="{\"outputs_hidden\":true}" trusted="true"}
+``` {.R}
+head(daily_activity)
+head(sleep)
+head(daily_steps)
+head(daily_calories)
+```
+:::
+
+::: {.cell .markdown}
+Now that we have our datasets formated, we will be able to merge the
+data. Let\'s start by merging daily_activity and sleep.
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:44.271726Z\",\"iopub.status.idle\":\"2022-06-19T14:37:46.481564Z\",\"iopub.execute_input\":\"2022-06-19T14:37:44.273361Z\"}" trusted="true"}
+``` {.R}
+daily_activity_sleep <- merge(daily_activity, sleep, by=c ("id", "date"))
+glimpse(daily_activity_sleep)
+```
+:::
+
+::: {.cell .markdown}
+# 4. Analysis explanation {#4-analysis-explanation}
+
+## What are the most interesting trends to review?
+
+For us to compare Leaf to the analyzed product, we may need to identify
+trends about some main features. Let\'s review at first what is the
+relation between the steps and the sleep. For that, we may need to
+calculate the average steps per day for each user, because we have the
+total slept time.
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:46.484269Z\",\"iopub.status.idle\":\"2022-06-19T14:37:46.540592Z\",\"iopub.execute_input\":\"2022-06-19T14:37:46.485804Z\"}" trusted="true"}
+``` {.R}
+daily_average <- daily_activity_sleep %>%
+  group_by(id) %>%
+  summarise(mean_daily_steps = mean(totalsteps), mean_daily_calories = mean(calories), mean_daily_sleep = mean(value))
+
+head(daily_average)
+```
+:::
+
+::: {.cell .markdown}
+We now can see that the sleep time is to low, it\'s about an hour
+average, so maybe the dataset is wrong or has information about people
+with insomnia, or the app from FitBit doesn\'t measure correctly the
+time asleep. Also, it can be the measure for the deep sleep state. In
+any case, I\'ll mention this is issue in the conclusion phase. For now,
+let\'s move on with this data.
+
+Now, let\'s do the same but for the steps and for the calories.
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:46.543162Z\",\"iopub.status.idle\":\"2022-06-19T14:37:47.13208Z\",\"iopub.execute_input\":\"2022-06-19T14:37:46.544642Z\"}" trusted="true"}
+``` {.R}
+daily_average %>%
+    ggplot(aes(x=mean_daily_steps, y=mean_daily_calories, size = mean_daily_calories)) +
+    geom_point() 
+```
+:::
+
+::: {.cell .markdown}
+Now, we reviewed that there is no connection at all between calories and
+steps. This can be ok because there may be different weights and
+heights, metabolsims and habits that aren\'t taken into consideration.
+What we may analyze though is the user level of activity.
+
+It may be:
+
+-   Sedentary - Less than 5000 steps a day.
+-   Lightly active - Between 5000 and 7499 steps a day.
+-   Fairly active - Between 7500 and 9999 steps a day.
+-   Very active - More than 10000 steps a day.
+
+Let\'s make a trend out of it:
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:47.134485Z\",\"iopub.status.idle\":\"2022-06-19T14:37:47.165598Z\",\"iopub.execute_input\":\"2022-06-19T14:37:47.135921Z\"}" trusted="true"}
+``` {.R}
+user_type <- daily_average %>%
+  mutate(user_type = case_when(
+    mean_daily_steps < 5000 ~ "sedentary",
+    mean_daily_steps >= 5000 & mean_daily_steps < 7499 ~ "lightly active", 
+    mean_daily_steps >= 7500 & mean_daily_steps < 9999 ~ "fairly active", 
+    mean_daily_steps >= 10000 ~ "very active"
+  ))
+
+head(user_type)
+```
+:::
+
+::: {.cell .markdown}
+We\'ve determinated the user type, now, let\'s count for each type.
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:47.16798Z\",\"iopub.status.idle\":\"2022-06-19T14:37:47.213474Z\",\"iopub.execute_input\":\"2022-06-19T14:37:47.169352Z\"}" trusted="true"}
+``` {.R}
+user_type_percent <- user_type %>%
+  group_by(user_type) %>%
+  summarise(total = n()) %>%
+  mutate(totals = sum(total)) %>%
+  group_by(user_type) %>%
+  summarise(total_percent = total / totals) %>%
+  mutate(labels = scales::percent(total_percent))
+
+user_type_percent$user_type <- factor(user_type_percent$user_type , levels = c("very active", "fairly active", "lightly active", "sedentary"))
+
+
+head(user_type_percent)
+```
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T14:37:47.215976Z\",\"iopub.status.idle\":\"2022-06-19T14:37:47.650195Z\",\"iopub.execute_input\":\"2022-06-19T14:37:47.217395Z\"}" trusted="true"}
+``` {.R}
+user_type_percent %>%
+  ggplot(aes(x=user_type, y=total_percent,fill=user_type)) +
+  geom_bar(stat = "identity", width = .7)+
+  scale_fill_manual(values = c("#85e085","#e6e600", "#ffd480", "#ff8080")) +
+  geom_text(aes(label = labels), position = position_stack(vjust = 0.5))+
+  labs(title="User activity") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+:::
+
+::: {.cell .markdown}
+Now we reviewed that 80% of the users are at least lightly active. 1 of
+each 3 users is fairly active, and 1 of 5 is very active. Let\'s review
+what are days with the most and the least steps:
+:::
+
+::: {.cell .code collapsed="true" execution="{\"iopub.status.busy\":\"2022-06-19T14:37:47.65255Z\",\"iopub.status.idle\":\"2022-06-19T14:37:48.04081Z\",\"iopub.execute_input\":\"2022-06-19T14:37:47.653906Z\"}" jupyter="{\"outputs_hidden\":true}" trusted="true"}
+``` {.R}
+weekday_steps <- daily_activity_sleep %>%
+  mutate(weekday = weekdays(date))
+
+weekday_steps$weekday <-ordered(weekday_steps$weekday, levels=c("Monday", "Tuesday", "Wednesday", "Thursday",
+"Friday", "Saturday", "Sunday"))
+
+ weekday_steps <-weekday_steps%>%
+  group_by(weekday, user = id) %>%
+  summarize (daily_steps = mean(totalsteps))
+
+View(weekday_steps)
+```
+:::
+
+::: {.cell .markdown}
+Here, we can see the activity for each user every day of the week.
+Let\'s make a trend out of it:
+:::
+
+::: {.cell .code collapsed="true" execution="{\"iopub.status.busy\":\"2022-06-19T14:37:48.043324Z\",\"iopub.status.idle\":\"2022-06-19T14:37:48.15029Z\",\"iopub.execute_input\":\"2022-06-19T14:37:48.044755Z\"}" jupyter="{\"outputs_hidden\":true}" trusted="true"}
+``` {.R}
+weekday_steps <- weekday_steps %>%
+  mutate(day_was = case_when(
+    daily_steps < 5000 ~ "sedentary",
+    daily_steps >= 5000 & daily_steps < 7499 ~ "lightly active", 
+    daily_steps >= 7500 & daily_steps < 9999 ~ "fairly active", 
+    daily_steps >= 10000 ~ "very active"
+  )) 
+
+weekday_percentage <- weekday_steps%>%
+  group_by(weekday, day_was) %>%
+  summarise(total = n()) %>%
+  mutate(totals = sum(total)) %>%
+  summarise(total_percent = total / totals, day_was) %>%
+  mutate(labels = scales::percent(total_percent))
+
+
+View(weekday_percentage)
+```
+:::
+
+::: {.cell .code execution="{\"iopub.status.busy\":\"2022-06-19T15:16:25.819915Z\",\"iopub.status.idle\":\"2022-06-19T15:16:27.163037Z\",\"iopub.execute_input\":\"2022-06-19T15:16:25.822567Z\"}" trusted="true"}
+``` {.R}
+color_range <- colorRampPalette(c("red", "green"))
+color <- color_range(21)
+weekday_percentage %>%
+  ggplot(aes(x=weekday, y=labels, fill = labels)) +
+  scale_fill_manual(values = color) +
+  geom_bar(width = 1, stat = "identity") + 
+  theme(axis.text.x = element_text(angle=45, vjust = .5), axis.ticks.x = element_blank() , axis.text.y = element_blank() , axis.ticks.y = element_blank()) +
+  facet_wrap(~day_was) +
+  labs(title="Days by level of activity") +
+  theme(plot.title = element_text(hjust = 0.5))
+weekday_steps %>%
+ggplot(aes(x=weekday,y = daily_steps, fill=day_was)) +
+  geom_bar(stat = "identity", width = .7) +
+  labs(title="User activity through the week") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+:::
+
+::: {.cell .markdown}
+We came to a big conclusion, that average people are more active on
+saturdays, and less active on sundays. At weekends, people are more
+sedentary as well, meanwhile during the week people tend to be lightly
+or fairly active. During the first 4 days of the week, we tend to be
+less lightly active and more fairly and very active. Sedentary levels
+decrease on wednesdays and thursdays.
+
+# 5. Visualization results {#5-visualization-results}
+
+## What did we find?
+
+We found that people is evenly active during the week, they are the most
+active during satuday and the least active during sunday. A major
+percentage of the users (50%) are very active during saturday, but there
+is a lot of sedentarism too.
+
+There is no correlation in this analysis between the user_activity and
+the calories, there are several explanations for this:
+
+-   Data for the calories may not be accurate, which is more likely to
+    be becuase the band wasn\'t properly adjusted.
+-   The analysis may be biased, so that the users take a lot of calories
+    and don\'t make that many steps, or viceversa. This is likely
+    because of the small dataset that was taken into consideration.
+-   Even though there is a chance it\'s not biased, further analysis
+    with more data has to be done in order to determine if weight and
+    height are important and relevant to this matter.
+
+We also reviewed that at least 80% of the users are active, and that 20%
+are sedentary on average.
+
+# 6. Recomendations to the stakeholders {#6-recomendations-to-the-stakeholders}
+
+I would definitely recommend at first that for Leaf, we need to make
+sure that we give proper guidance and instructions on how to use the
+different tools, so that we can gather even more data, give the user
+more accurate recommendations and positively impact on its health.
+
+As we reviewed data from both men and women, the dataset may need some
+more infomation, so that maybe we can get to know very important
+variables like sex, height, weight, physical goal, stress, etc. As well,
+one thing that is definitely going to happen is that we promote activity
+during the least active days, like sunday or friday, by using reminders,
+setting steps or caloric goals.
+
+Other recommendation I would give is that we need to make sure to
+measure sleep correctly, so that we can have more information about the
+sleep stage (light, REM, deep) and the total time, compare that with
+other users and give proper advices for sleeping better.
+:::
