@@ -1,0 +1,38 @@
+Pandas to read, clean and transform data
+Matplotlib and seabourn for visualization.
+In Python, instead of traditional excel and tableau, you don’t really get a visual reference. It is more useful for large datasets, mainly from databases.
+Knowing Python and SQL, get’s you better salaries, more money and it will be worth it. There’s no cap. You can be a senior data analyst or scientist within a short period of time, and 
+make lots of money. It’s hard but so it is another job, and you’ll be earning three or four times by the end of your second year. 
+
+Sales.info() -> gets you the dataset information.
+Sales.shape() -> gets you (rows, columns) total.
+Sales.describe() -> gets you the most useful stats for the dataset. It is a QUICK way to review stats.
+	If we want to do it just for one column, lets do Sales[“Unit_Cost”].describe()
+	Plot: ax = Sales[“Unit_Cost”].plot(kind=”box”, vert =False, figsize=(14,6)) #This uses matplotlib,through pandas
+	Could be another type of plot, like density: kind=”density”
+	To make a line, use ax.axvline(sales[“Unit_cost”].mean(), color=”red”)
+For histogram use kind=”hist”, ax.set_y_label(“y”), ax.set_x_label(“x”)
+Count with .value_counts(), quick chart with .value_counts().plot(kind=….)
+figsize gives the size of the plot, very useful.
+Corr = sales.corr() gives you the correlation between columns. Example price and revenue.
+For scatter plot, kind=”scatter”, x = adasd y = sadasdas
+To group by, use Sales[[“profit”,”age_group”]].boxplot(by= “age_group”)
+Try making subplots with subplot=True
+Let’s add a new column to the dataset with sales[revenue_per_age] = sales[“revenue”] / sales[“age”]
+Plot it with kind=”hist”, or whatever.
+To check matches or unmatches: (sales[“Calculated_cost”] != sales[“Cost”]).sum()
+Add 3% to everything (inflation): sales[“unit_price”] *= 1.03
+
+Get sales from something: sales.loc[sales[“state”] == “Kentucky”] REMEMBER .loc uses [] not ()
+If we want to get only one column, sales.loc[sales[”Age_group”] == “Youth <25”, “revenue”] gets revenue for the matches.
+sales.loc[sales[”Age_group”] == “Youth <25”, “revenue”] *= 1.1 to increase all the matches.
+For histograms, bins are the amount of cells or values taken into consideration by the plot.
+
+sqlite3 for MySQL in python
+
+conn = sqlite3.connect('data/sakila.db') for connecting with db
+df = pd.read_sql(''' Query ''', conn, index_col = rental_id, parse_dates=['rental_date','return_date']) to get the dataset in a variable
+* index_col= the name that the id will acquire
+* parse_dates will will attempt to infer the format of the datetime
+
+so we already have a dataframe! process is the same. For reviewing, use .head()
