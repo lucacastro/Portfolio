@@ -1,0 +1,91 @@
+Pandas is the main library used for data analysis. 
+Gets the data from multiple sources as reviewed.
+Processes the data.
+Visualizes the data.
+Creating reports, statistical analysis, machine learning.
+
+import pandas as pd
+import numpy as np 
+pandas is based on numpy
+
+series: serie = pd.series([34, 23, 72, 51, 67, 24])
+it has a dtype, it can also have other atributes
+
+serie.name = "age"
+serie.values gets you the values
+
+serie[0] gets you element 0, just like a regular list
+because, it has an index.
+BUT we can modify those indexes:
+series.index = ["Peter", "George", "Jake", "Thomas", "Roy", "Michael"]
+the thing is, unlike a dictionary, it is ordered!
+
+so we can create the series like a JSON. 
+
+pd.series({
+'john': 2
+'thomas': 5
+...
+}, name = 'age')
+
+for locating for location of secuential position:
+serie.iloc[0] -> 2 (john)
+
+we can get multiindexes
+serie[["john", "thomas"]] 
+
+we can aslso slice, BUT the upper limit is included
+serie[["john" : "thomas"]] gets thomas as well
+
+boolean series in pandas. 
+series > 3 gets
+John False
+Thomas True
+we can apply as well the boolean filtering,
+serie[serie>3] should get only Thomas record
+
+A DataFrane column will be a serie
+df.columns
+df.index gets you indexes (remember that they can be labels )
+df.info() gets you type, not non-nulls
+df.size (colums*rows)
+df shape
+df.describe() gets you good stats
+df.dtypes gets you types
+df.dtypes.value_counts() gets you the amount of types
+
+df.loc["john"] lets you select rows name is the john
+df.iloc[0] lets you select rows by sec position
+df["population"] gets you the entire COLUMN name is population
+
+for multiple columns, you can pass as a second argument
+df.loc["John":"Thomas", 'age'] or df.loc["John":"Thomas", ['height', 'age']]
+
+to drop use .drop()
+
+df.drop('Thomas')
+df.drop(['John','Thomas'])
+df.drop(columns=['age', 'height'])
+
+this doesn't drop data from the actual dataframe, 
+
+lets make a serie: add = pd.Series([-1_000_000, -0.3])
+
+df[["GDP","HDI"]] + add
+
+for modifying series, 
+
+langs = new_column #new_column lets say are languages, ['french', 'german', 'Italian'], index=['France', 'Germany', 'Italy'], name='Language'
+df['Language'] = langs #creates a column 'Language' with the data we've created
+
+Renaming columns: 
+
+df.rename(columns={
+		'HDI': 'Human development index'
+	}, index={
+		'United States': 'USA'
+	}) 
+Remember that if we rename something that doesn't exist, there is NO problem
+Remember it is inmutable. 
+
+
