@@ -35,4 +35,105 @@ df = pd.read_sql(''' Query ''', conn, index_col = rental_id, parse_dates=['renta
 * index_col= the name that the id will acquire
 * parse_dates will will attempt to infer the format of the datetime
 
-so we already have a dataframe! process is the same. For reviewing, use .head()
+so we already have a dataframe! process is the same. For reviewing, use .head().
+
+
+JUPYTER NOTEBOOKS:
+*A adds a cell above
+*B adds a cell below
+*DD deletes a cell
+*Esc gets out of editing mode to command mode
+*Return get in editing mode
+*M makes it markdown
+*Y makes it python
+*Ctrl Return executes the cell
+*Shift return executes the cell and moves to the next one
+
+to pull data from the web, import requests
+
+requests.get(url, params={
+'periods': 3600,
+...
+})
+
+
+Dynamic plots with Bokeh.
+from bokeh.plotting import figure, output_file, show
+from bokeh.io import output_notebook
+
+matplotlib > bokeh for data analysis. But for data science and not making reports, bokeh is great.
+
+Export to excel:writer =  pd.ExcelWriter('table.xlsx'). That creates a component for the export.
+bitcoin.to_excel(writer, sheet_name="bitcoin")
+ethereum.to_excel(writer, sheet_name="ethereum")
+writer.save()
+
+NumPy is for numeric calculation, for making Python more efficient and low level, for it to be fast.
+
+import sys
+import numpy as np
+
+
+
+basic numpy array:a= np.array([1, 2, 3, 4])
+a[[0,2, -1]] #this results in another numpy array.
+
+to create with another type, use 
+np.array([1, 2, 3, 4], dtype=np.int8)
+
+matrix with numpy:
+
+A = np.array([
+	[1,2,3],
+	[4,5,6]
+]) 
+
+A.shape gets the dimensions: (2,3)
+A.ndim gets dimensions: 2
+A.size gets total numbers: 6
+
+for multidimensional arrays, try to match columns and rows because if not it will go back to normal python objects
+
+to get elements, try A[1, 0], it lets you add slicing. 
+A[:, :2]  is possible
+A[2] = np.array([10,10,10]) OR A[2] = 10
+
+A.sum() get the sum of the values. A.mean()
+
+sum(axis=0) -> [12, 15, 18]
+
+a = np.arange(4)
+a + 10 -> array([10, 11, 12, 13])
+a * 10
+
+list comprehension: 
+l = [0, 1, 2, 3]
+[i * 10 for i in l]
+[0, 10, 20, 30]
+
+a= array[0,1,2,3]
+b= array[10,10,10,10]
+a+b= array[10,11,12,13]
+
+to select elements, there is a third way
+a= array[0,1,2,3]
+a[[True, False, False, True]]
+array[0,3]
+
+a >= 2
+array([False, False, True, True])
+a[a >= 2]
+arrat[2,3] 
+this is so that we get only the matches
+
+a[a > a.mean()] #get me all the elements that are greater than the mean
+
+A= np.random.randint(100, size=(3,3)) this gets me a random number for every elem of a 3x3 mat
+
+Linear Algebra in python: 
+
+AxB = A.dot(B) or A @ B
+B.Transp = B.T
+
+for perform use %time 
+
