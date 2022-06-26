@@ -1,0 +1,137 @@
+Data Cleaning
+pd.isnull(np.nan) #np.nan is None for NumPy
+True #it is null
+
+pd.notnull(np.nan)
+False
+
+This works with entire series
+pd.isnull(pd.Series([1, np.nan, 7]))
+# FALSE TRUE FALSE dtype bool
+could be s.isnull()
+
+
+For counting not null or null values
+
+pd.isnull(pd.Series([1, np.nan, 7])).sum()
+
+s.dropna() excludes nan, even if there is only one in the several columns
+could be df.dropna(axis=1) #that drops the columns with the NaN
+df.dropna(how="all") #drop if all the values are null
+df.dropna(how="any") #drop if any value is null
+df.dropna(thresh=3) #need this amount of VALID values
+start with an info() method
+
+Filling NaN values! 
+s.fillna(0) #Fills NA's with 0
+s.fillna(s.dropna().mean())
+
+s.fillna(method="ffill") (it fills NaN with the previous value)
+s.fillna(method="bfill") (it fill Nan with next value)
+s.fillna(method="bfill", axis=1) (it fill Nan with next column value)
+
+.any() .all() look for NaN booleans
+
+For cleaning Not Null Values:
+df['Sex'].unique() #gives us the all the values
+df['Sex'].replace('D', 'F')
+
+df.loc[df['Age'] > 100, 'Age'] / 10
+
+Duplicates:
+
+ambassadors.duplicated() #by default, the first register isn't duplicate.
+ambassadors.duplicated(keep='last') #last element in not duplicate
+ambassadors.duplicated(keep=False) #Everything is duplicate 
+ambassadors.drop_duplicates() #by default, the first register isn't duplicate.
+ambassadors.drop_duplicates(keep='last') #last element in not duplicate
+ambassadors.drop_duplicates(keep=False)
+
+
+players.duplicated(subset=['Name'], keep='last') #to look duplicates for columns
+
+for string handling:
+df['Data'].str.split('_')
+For creating a dataframe out of the split:
+df['Data'].str.split('_', expand=True)
+
+df['Data'].str.contains('U') #analyzes which values contain 'U'
+df['Data'].str.strip() #removes blank spaces
+df['Data'].str.replace(' ', '') #replaces text
+
+Visualizations with matplotlib: 
+OOP API and Global API
+
+import matplotlib.pyplot as plt #whole module
+
+Process for Global API: 
+plt.figure(figsize=(12,6))
+plt.title('My plot')
+
+plt.subplot(1,2,1) #my plot is gonna have 1 row, 2 columns, and let´s draw on 1 first.
+#after this, we will affect plot n1
+
+plt.plot(x, x**2) #I plot values in X and Y
+plt.plot([0, 0, 0], [-10, 0, 100]) #vertical line in 0
+plt.legend(['X**2'], ['Vertical Line']) #lets add a legend to distinguish the plotting
+plt.xlabel('X') 
+plt.ylabel('X Squared')
+
+plt.subplot(1,2,2) #let's go with the second plot
+.
+.
+.
+
+Process for OOP Interface:
+fig, axes = plt.sublplots(figsize=(12,6))
+
+axes.plot(x, x + 0, label="solid green")
+axes.plot(x, x + 1, label="dashed cyan")
+axes.plot(x, x + 2, label="dashdot blue")
+axes.plot(x, x + 3, label="dotted red") 
+#linestyle=; marker=; color=;
+
+Scatter plots:
+plt.scatter(x, y, s=area, c=colors, alpha=; cmap='Spectral')
+
+Histogram:
+plt.hist(values, bins=100, etc...)
+
+Bar:
+plt.figure(figsize=(12,6))
+plt.bar(np.arange(len(Y)), Y, width=barWidth, color='#0023df')
+plt.show()
+
+Stack bars:
+plt.bar(np.arange(len(Y)), Y, width=barWidth, color='#0023df')
+plt.bar(np.arange(len(Y2)), Y2, width=barWidth, bottom=Y, color='#00711f')
+
+Boxplots:
+plt.boxplot(values)
+
+For zooming between values:
+df.loc['2017-12':'2017-12-15].plot(y='Ether', figsize=(16,9))
+
+Seaborn
+fig, ax = plt.subplots(figsize=(15, 7))
+sns.distplot(df_cleaned['Ether'], ax=ax)
+
+Bivariate distribution
+sns.jointplot(x='Bitcoin', y='Ether')
+
+For a scatter plot with std
+fig, ax = plt.subplots(figsize=(15, 7))
+sns.regplot(x="Bitcoin", y="Ether", data=df_cleaned, ax=ax)
+
+Range: df['Bitcoin'].max() - df['Bitcoin'].min()
+better: df_cleaned['Bitcoin'].max() - df_cleaned['Bitcoin'].min()
+
+df_cleaned['Bitcoin'].std()
+df_cleaned['Bitcoin'].var()
+
+IQR: df['Bitcoin'].quantile(.75) - df['Bitcoin'].quantile(.25)
+
+To distinguish not ordinary values. 
+
+upper_limit = df['Bitcoin'].mean() + 2 * df['Bitcoin'].std()
+lower_limit = df['Bitcoin'].mean() - 2 * df['Bitcoin'].std()

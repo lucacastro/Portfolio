@@ -1,0 +1,42 @@
+You can read_csv from an URL as well.
+If there is no header: header=None
+
+For values that are refering to null:
+na_values=['',?,'-']
+NaN
+
+names=["Timestamp", "Price"]
+dtype={'Price':'float'}
+parse_dates=[0] #for Timestamp
+
+if the csv is not with commas,
+pd.read_csv(URL, sep='>')
+
+Save to CSV file: .to_csv()
+
+Read data from relational databases:
+import sqlite3
+
+conn = sqlite3.connect('chinook.db')
+cur = conn.cursor() #cursor allows to execute queries against a database
+cur.execute('SELECT * FROM employees')
+
+pd.read_sql('SELECT * FROM employees', conn)
+
+other option: 
+import sqlalchemy
+engine = create_engine('sqlite:///chinook.db')
+connection = engine.connect()
+df = pd.read_sql_table('employees', con=connection)
+
+df.to_sql?
+cur.execute('drop table if exists employees2;')
+cur.close()
+df.to_sql('employees2', conn)
+pd.read_sql_query()
+
+Reading HTML
+html_string = """ .... """
+AA00B1LT0J
+
+

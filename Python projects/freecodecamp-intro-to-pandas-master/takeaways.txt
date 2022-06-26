@@ -88,4 +88,16 @@ df.rename(columns={
 Remember that if we rename something that doesn't exist, there is NO problem
 Remember it is inmutable. 
 
+Reading CSV:
+btc = pd.read_csv('data/btc.csv')
+btc.head() #by default, pandas assumes that the first row of the csv is the column names.
+For changing that add header=None
 
+For parsing into datetime:
+btc['Timestamp'] = pd.to_datetime(btc['Timestamp'])
+
+To add columns headers: btc.columns = ['Timestamp','Price']
+let's say we want to filter by date as an index, 
+btc.set_index('Timestamp', inplace=True)
+
+We can get this done through parameters of the read_csv method.
